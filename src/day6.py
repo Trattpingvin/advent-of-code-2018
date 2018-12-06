@@ -1,24 +1,98 @@
+import numpy as np
+
+def find_closest(x1, y1, coords): #-1
+	#make sure they're in the same coordinate system
+	closest_dist = 999999
+	closest_pair_index = 0
+	hits = 0
+	for i, pair in enumerate(coords):
+		x2, y2 = pair[0], pair[1]
+		current_dist = abs(x2-x1)+abs(y2-y1)
+		if current_dist<closest_dist:
+			closest_dist = current_dist
+			closest_pair_index = i
+			hits = 1
+		elif current_dist==closest_dist:
+			hits += 1
+
+	if(hits>1): return -1
+	return closest_pair_index
+
 def solvepart1():
-	freq = 0
-	with open('inputs/day1.txt') as f:
-		for i in f:
-			freq += int(i)
-	return freq
+	coords = []
+	with open('inputs/day6.txt') as f:
+		for line in f:
+			pair = map(int, line.split(", "))
+			coords.append(pair)
+
+	xmin, xmax, ymin, ymax = 1000,0,1000,0
+	for pair in coords:
+		if(pair[0]>xmax): xmax = pair[0]
+		if(pair[0]<xmin): xmin = pair[0]
+		if(pair[1]>ymax): ymax = pair[1]
+		if(pair[1]<ymin): ymin = pair[1]
+
+	shape = (xmax-xmin, ymax-ymin)
+	grid = np.zeros(shape, dtype=np.int)
+
+#	vectorized_f = np.vectorize(find_closest) #TODO RESEARCH
+#	vectorized_f(grid)
+
+	for i, _ in np.ndenumerate(grid):
+		grid[i] = find_closest(i[0]+xmin,i[1]+ymin,coords)
+
+	bad = reduce(np.union1d,(grid[0], grid[xmax-xmin-1], grid[:,0], grid[:,ymax-ymin-1]))
+	
+	print bad
+	
+	valid = False
+	ansmax = 0
+	for i in range(len(coords)):
+		if i in bad:
+			continue
+		ans = (i==grid).sum()
+		if(ans>ansmax):
+			ansmax = ans
+
+	return ansmax
+
+def check_friendly_region(x1, y1, coords): 
+	
+	limit = 10000
+	distance_sum = 0
+	for pair in coords:
+		x2, y2 = pair[0], pair[1]
+		current_dist = abs(x2-x1)+abs(y2-y1)
+		distance_sum += current_dist
+		if distance_sum>=limit:
+			return False
+	return True
 
 def solvepart2():
-	freq = 0
-	seen_freqs = set([freq])
-	while True:
-		with open('inputs/day1.txt') as f:
-			for i in f:
-				freq += int(i)
-				if freq in seen_freqs:
-					return freq
-				seen_freqs.add(freq)
+	coords = []
+	with open('inputs/day6.txt') as f:
+		for line in f:
+			pair = map(int, line.split(", "))
+			coords.append(pair)
 
-	return freq
+	xmin, xmax, ymin, ymax = 1000,0,1000,0
+	for pair in coords:
+		if(pair[0]>xmax): xmax = pair[0]
+		if(pair[0]<xmin): xmin = pair[0]
+		if(pair[1]>ymax): ymax = pair[1]
+		if(pair[1]<ymin): ymin = pair[1]
+
+	shape = (xmax-xmin, ymax-ymin)
+	grid = np.zeros(shape, dtype=np.int)
+
+#	vectorized_f = np.vectorize(find_closest) #TODO RESEARCH
+#	vectorized_f(grid)
+
+	for i, _ in np.ndenumerate(grid):
+		grid[i] = check_friendly_region(i[0]+xmin,i[1]+ymin,coords)
+
+	return grid.sum()
 
 if __name__=='__main__':
 	print solvepart1()
 	print solvepart2()
-
