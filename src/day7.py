@@ -1,22 +1,69 @@
+import numpy as np
+import pdb
+import StringIO
+import string
+
+def numberize(c): #make A into 0, B into 1... only owrks on capital letters
+	if c in string.ascii_uppercase:
+		return ord(c)-65
+	raise
+
+def letterize(c): #inverse of numberize
+	return chr(c+65)
+	
+#Step C must be finished before step A can begin.
+
+def read_graph(f):
+	seen = set()
+	graph = np.zeros((26,26))
+	for line in f.readlines():
+		i = numberize(line[5])
+		j = numberize(line[36])
+		seen.add(i)
+		seen.add(j)
+		graph[i][j] = 1
+	graph = graph[0:len(seen),0:len(seen)]
+	return graph
+
+def get_open_nodes(graph, indexfilter):
+	ans = []
+	for i in range(len(graph)):
+		if i in indexfilter:
+			continue
+		if graph[:,i].sum()==0:
+			ans.append(i)
+	return ans
+
+def mark_completed(graph, i, indexfilter): #release edges going from i since it's completed
+	graph[i,:] = 0
+	indexfilter.add(i)
+
+
 def solvepart1():
-	freq = 0
-	with open('inputs/day1.txt') as f:
-		for i in f:
-			freq += int(i)
-	return freq
+	example = StringIO.StringIO("""Step C must be finished before step A can begin.
+Step C must be finished before step F can begin.
+Step A must be finished before step B can begin.
+Step A must be finished before step D can begin.
+Step B must be finished before step E can begin.
+Step D must be finished before step E can begin.
+Step F must be finished before step E can begin.""")
+
+	with open('inputs/day7.txt') as f:
+		graph = read_graph(f)
+	
+	#graph = read_graph(example)
+	indexfilter = set()
+	ans = ""
+	while(len(graph)!=len(indexfilter)):
+		node = get_open_nodes(graph, indexfilter)[0]
+		mark_completed(graph, node, indexfilter)
+		ans += letterize(node)
+
+	return ans
+
 
 def solvepart2():
-	freq = 0
-	seen_freqs = set([freq])
-	while True:
-		with open('inputs/day1.txt') as f:
-			for i in f:
-				freq += int(i)
-				if freq in seen_freqs:
-					return freq
-				seen_freqs.add(freq)
-
-	return freq
+	pass
 
 if __name__=='__main__':
 	print solvepart1()

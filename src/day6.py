@@ -1,10 +1,15 @@
 import numpy as np
 
-def find_closest(x1, y1, coords): #-1
+def find_closest(loc, coords): #-1 for ties
 	#make sure they're in the same coordinate system
-	closest_dist = 999999
+
+	closest_dist = np.inf
 	closest_pair_index = 0
 	hits = 0
+	dist = np.abs(loc[:,None] - coords).sum(-1)
+#	np.abs(coords-loc)
+	import pdb
+	pdb.set_trace()
 	for i, pair in enumerate(coords):
 		x2, y2 = pair[0], pair[1]
 		current_dist = abs(x2-x1)+abs(y2-y1)
@@ -19,11 +24,10 @@ def find_closest(x1, y1, coords): #-1
 	return closest_pair_index
 
 def solvepart1():
-	coords = []
-	with open('inputs/day6.txt') as f:
-		for line in f:
-			pair = map(int, line.split(", "))
-			coords.append(pair)
+
+
+	coords = np.loadtxt(open('inputs/day6.txt'), delimiter=', ', dtype=np.int)
+
 
 	xmin, xmax, ymin, ymax = 1000,0,1000,0
 	for pair in coords:
@@ -35,8 +39,9 @@ def solvepart1():
 	shape = (xmax-xmin, ymax-ymin)
 	grid = np.zeros(shape, dtype=np.int)
 
-#	vectorized_f = np.vectorize(find_closest) #TODO RESEARCH
-#	vectorized_f(grid)
+	ans = find_closest(np.where(grid==grid), coords)
+
+	return ans
 
 	for i, _ in np.ndenumerate(grid):
 		grid[i] = find_closest(i[0]+xmin,i[1]+ymin,coords)
@@ -95,4 +100,4 @@ def solvepart2():
 
 if __name__=='__main__':
 	print solvepart1()
-	print solvepart2()
+	#print solvepart2()
