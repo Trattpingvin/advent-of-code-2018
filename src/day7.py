@@ -86,6 +86,7 @@ def solvepart2():
 		for worker in (w for w in workers if w!=-1):
 			if(workleft[worker])<leastwork:
 				leastwork = workleft[worker]
+		#progress time the amount that we can, and then apply that time to all hte works being worked on
 		time += leastwork
 		for worker in (w for w in workers if w!=-1):
 			workleft[worker] -= leastwork
@@ -94,11 +95,6 @@ def solvepart2():
 				workers[workers.index(worker)] = -1
 
 	return time
-
-
-
-
-
 
 if __name__=='__main__':
 	print solvepart1()
