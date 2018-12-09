@@ -67,33 +67,31 @@ def solvepart2():
 		graph = read_graph(f)
 	w = 5
 	time = 0
-	workers = [[-1] for _ in range(w)]
+	workers = [-1 for _ in range(w)]
 	indexfilter = set()
 	workleft = [61+numberize(c) for c in string.ascii_uppercase[:len(graph)]]
-
-	pdb.set_trace()
 
 	while sum(workleft)>0:
 		#assign work
 		avail = get_open_nodes(graph, indexfilter)
 		for work in avail:
-			for worker in [w for w in workers if w[0]==-1]:
-				worker[0] = work
+			for worker in (w for w in workers if w==-1):
+				workers[workers.index(worker)] = work
 				indexfilter.add(work)
 				break
 
 		#process work
 		#find work about to complete
 		leastwork = np.inf
-		for worker in [w for w in workers if w[0]!=-1]:
-			if(workleft[worker[0]])<leastwork:
-				leastwork = workleft[worker[0]]
+		for worker in (w for w in workers if w!=-1):
+			if(workleft[worker])<leastwork:
+				leastwork = workleft[worker]
 		time += leastwork
-		for worker in [w for w in workers if w[0]!=-1]:
-			workleft[worker[0]] -= leastwork
-			if(workleft[worker[0]]==0):
-				mark_completed(graph, worker[0], indexfilter)
-				worker[0] = -1
+		for worker in (w for w in workers if w!=-1):
+			workleft[worker] -= leastwork
+			if(workleft[worker]==0):
+				mark_completed(graph, worker, indexfilter)
+				workers[workers.index(worker)] = -1
 
 	return time
 
