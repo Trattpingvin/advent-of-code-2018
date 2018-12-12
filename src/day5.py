@@ -1,42 +1,46 @@
 import string
+import pdb
 
-def solvepart1():
-	def react(a, b):
-		if abs(ord(a)-ord(b)) == 32: #ascii diff between lowercase and uppercase
-			return True
-		return False
+def react(a, b):
+	if abs(ord(a)-ord(b)) == 32: #ascii diff between lowercase and uppercase
+		return True
+	return False
 
+def reduce_polymer(data): #0.42sec
+	skipped_indexes = set()
+	i = 0
+	while i<len(data)-1:
+		j = i
+		while j in skipped_indexes:
+			j -= 1
+		current_index = j #first unskipped index backwards from previous
+		j = i + 1
+		while j in skipped_indexes:
+			j += 1
+		next_index = j  #first unskipped index forwards from previous+1
+		
+		if react(data[current_index], data[next_index]):
+			skipped_indexes.add(current_index)
+			skipped_indexes.add(next_index)
+			
+		i += 1
+	
+	ans = ""
+	for i, d in enumerate(data): #prettier way to do this? filter maybe?
+		if i not in skipped_indexes:
+			ans += d
+	return ans, len(ans.strip())
+
+
+def solvepart1(): #9562, 4934
 	with open('inputs/day5.txt') as f:
 		data = f.readline()
 	
-	i = 0
-	import pdb
-	while i<len(data)-1:
-		if react(data[i], data[i+1]):
-			new_data = data[:i]+data[i+2:]
-			data = new_data
-			i -= 2
-		i += 1
-
-	return data, len(data), len(data.strip())
+	return reduce_polymer(data)
 
 def solvepart2():
 	#pretty slow :/ but no speedup ideas right now
-	def react(a, b):
-		if abs(ord(a)-ord(b)) == 32: #ascii diff between lowercase and uppercase
-			return True
-		return False
 
-	def reduce_polymer(data):
-		i = 0
-		while i<len(data)-1:
-			if react(data[i], data[i+1]):
-				new_data = data[:i]+data[i+2:]
-				data = new_data
-				i -= 2
-			i += 1
-
-		return data, len(data.strip())
 
 	with open('inputs/day5.txt') as f:
 		data = f.readline()
