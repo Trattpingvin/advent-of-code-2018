@@ -17,20 +17,21 @@ def solve(vectors):
 
 	msg_start_y = min(v[:,1])
 	msg_start_X = min(v[:,0])
-	msg_width = max(v[:,0]) - msg_start_X
-	print v.shape
+	msg_width = max(v[:,0]) - msg_start_X + 1
+	msg_height = max(v[:,1]) - msg_start_y + 1 
+	
 	ans = ""
-	for i in range(stop):
-		ans +=''.join(["#" if msg_start_y+i==v[j,1] and j+msg_start_X==v[j,0] else "." for j in range(v.shape[0])])
+
+	grid = np.zeros(shape = (msg_width+1, msg_height+1))
+	for vector in v:
+		grid[vector[0]-msg_start_X, vector[1]-msg_start_y] = 1
+
+
+	for y in range(msg_height):
+		ans +=''.join("#" if 1==grid[x,y] else "." for x in range(msg_width))
 		ans += "\n"
 
-	return ans
-
-
-
-
-	
-
+	return ans, (alignment_error1-stop)/rate_of_change
 
 if __name__=='__main__':
 	vectors = []
