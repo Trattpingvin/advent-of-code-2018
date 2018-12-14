@@ -1,10 +1,6 @@
 import numpy as np
 
 def getpowerlevel(x, y, serialnumber):
-	#cache doesn't work if power is zero... but no big deal
-	global cache
-	if cache[x,y]!=0:
-		return cache[x,y]
 	rack_id = x+ 10
 	current = rack_id
 	current *= y
@@ -16,12 +12,9 @@ def getpowerlevel(x, y, serialnumber):
 	else:
 		current = int(str_current[-3])
 	ans = current - 5
-	cache[x, y] = ans
 	return ans
 
 def solve_naive(serialnumber):
-	global cache
-	cache = np.zeros(shape=(301, 301))
 	biggest_sum = 0
 	big_x = 0
 	big_y = 0
@@ -36,29 +29,51 @@ def solve_naive(serialnumber):
 	return biggest_sum, big_x, big_y
 
 
-
-def solve(serialnumber):
-
-	"""pretty aimless idea here... there might be something here - make a grid be sum of something, then an area is a lookup in the grid minus another looksup. sum of what though?"""
-	power_sums_x = np.zeros(shape=(301, 301))
+def build_lookup_grid(serialnumber):
+	power_grid = np.zeros(shape=(301,301), dtype=np.int)
 	for x in range(1,301):
 		for y in range(1, 301):
-			power_sums_x[x, y] = getpowerlevel(x, y, serialnumber) + power_sums_x[x-1,y]
+			power_grid[x, y] = getpowerlevel(x, y, serialnumber)
 
+	lookup_grid = np.zeros(shape=(301,301), dtype=np.int)
+	for x in range(1,301):
+		for y in range(1, 301):
+			lookup_grid[x,y] = power_grid[:x,:y].sum()
+	print lookup_grid
+	return lookup_grid
 
+def lookup_area(grid, x,y,size):#add back the diagonal because it was removed twice by the subtractions
+	return grid[x,y]-grid[x-size,y]-grid[x,y-size]+grid[x-size, y-size]
+
+def solve(grid, size):
 	biggest_sum = 0
-	big_x, big_y = 0, 0
-	power_sums_y = np.zeros(301)
-	for x in range(4,301):
-		for y in range(4, 301):
-			current_sum = power_sums[x,y]-power_sums[x-3, y]
-			power_sums_y[x] = current_sum
+	big_x,big_y = 0, 0
+	for x in range(size+1, 300):
+		for y in range(size+1, 300):
+			current_sum = lookup_area(grid,x,y,size)
+			if current_sum>biggest_sum:
+				biggest_sum = current_sum
+				big_x, big_y = x, y
 
+	return biggest_sum, big_x-size, big_y-size, size
 
+def solvepart1(serialnumber):
+	grid = build_lookup_grid(serialnumber)
+	return solve(grid, 3)
 
-	return biggest_sum, big_x, big_y
+def solvepart2(serialnumber):
+	grid = build_lookup_grid(serialnumber)
+
+	biggest_sum, big_x, big_y, size = 0,0,0,0
+	for s in range(1,300):
+		cur = solve(grid, s)
+		if cur[0]>biggest_sum:
+			biggest_sum, big_x, big_y, size = cur
+	return biggest_sum, big_x, big_y, size
 
 
 if __name__=='__main__':
-	print solve_naive(6042)
+	#print solve_naive(6042)
+	#print solve(6042, 3)
+	print solvepart2(6042)
 
