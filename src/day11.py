@@ -39,7 +39,6 @@ def build_lookup_grid(serialnumber):
 	for x in range(1,301):
 		for y in range(1, 301):
 			lookup_grid[x,y] = power_grid[:x,:y].sum()
-	print lookup_grid
 	return lookup_grid
 
 def lookup_area(grid, x,y,size):#add back the diagonal because it was removed twice by the subtractions
@@ -73,7 +72,9 @@ def solvepart2(serialnumber):
 
 
 if __name__=='__main__':
+
 	#print solve_naive(6042)
+	#print solvepart1(6042)
 	#print solve(6042, 3)
 	print solvepart2(6042)
 
