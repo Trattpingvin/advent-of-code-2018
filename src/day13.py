@@ -1,9 +1,73 @@
+def crash(cart, carts):
+	crash = 0
+	for c in carts:
+		if cart[0:2] == c[0:2]:
+			crash += 1
+	return crash>1 #larger than one because we're also checking against ourselves
+
+def rot_right(index):
+	if index==3:
+		return 0
+	return index+1
+
+def rot_left(index):
+	if index==0:
+		return 3
+	return index-1
+
+
+def solve(f):
+	try:
+		tracks = f.readlines()
+		dirs = "<^>v"
+		carts = [] #cart is tuple: x-coord, y-coord, direction, turning state
+		for y, line in enumerate(tracks):
+			for x, c in enumerate(line):
+				if c in dirs:
+					carts.append((x, y, dirs.index(c), 0))
+
+		loops = 0
+		while True:
+			for i, cart in enumerate(carts): #we have t o do this in order. probably sort it first?
+				x, y, c, state = cart
+				if c==0: x += -1
+				if c==1: y += -1
+				if c==2: x += 1
+				if c==3: y += 1
+
+				if crash(cart, carts):
+					return (x,y)
+
+				if tracks[y][x] == '/':
+					if c==0: c = rot_left(c)
+					if c==1: c = rot_right(c)
+					if c==2: c = rot_left(c)
+					if c==3: c = rot_right(c)
+
+				if tracks[y][x] == '\\':
+					if c==0: c = rot_right(c)
+					if c==1: c = rot_left(c)
+					if c==2: c = rot_right(c)
+					if c==3: c = rot_left(c)
+					
+				if tracks[y][x] == '+':
+					if state==0:
+						c = rot_left(c)
+					if state==2:
+						c = rot_right(c)
+					state = rot_right(state)
+
+				carts[i] = (x, y, c, state)
+			loops += 1
+	except:
+		import pdb
+		pdb.set_trace()
+
+
 def solvepart1():
-	freq = 0
-	with open('inputs/day1.txt') as f:
-		for i in f:
-			freq += int(i)
-	return freq
+	with open('inputs/day13.txt') as f:
+		return solve(f)
+	
 
 def solvepart2():
 	freq = 0
