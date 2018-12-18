@@ -5,8 +5,8 @@ def crash(cart, carts):
 			crash += 1
 	return crash>1 #larger than one because we're also checking against ourselves
 
-def rot_right(index):
-	if index==3:
+def rot_right(index, wrap = 3):
+	if index==wrap:
 		return 0
 	return index+1
 
@@ -35,29 +35,31 @@ def solve(f):
 				if c==2: x += 1
 				if c==3: y += 1
 
-				if crash(cart, carts):
-					return (x,y)
-
 				if tracks[y][x] == '/':
 					if c==0: c = rot_left(c)
-					if c==1: c = rot_right(c)
-					if c==2: c = rot_left(c)
-					if c==3: c = rot_right(c)
+					elif c==1: c = rot_right(c)
+					elif c==2: c = rot_left(c)
+					elif c==3: c = rot_right(c)
 
 				if tracks[y][x] == '\\':
 					if c==0: c = rot_right(c)
-					if c==1: c = rot_left(c)
-					if c==2: c = rot_right(c)
-					if c==3: c = rot_left(c)
+					elif c==1: c = rot_left(c)
+					elif c==2: c = rot_right(c)
+					elif c==3: c = rot_left(c)
 					
 				if tracks[y][x] == '+':
 					if state==0:
 						c = rot_left(c)
 					if state==2:
 						c = rot_right(c)
-					state = rot_right(state)
+					state += 1
+					if state==3:
+						state = 0
 
 				carts[i] = (x, y, c, state)
+				if crash(carts[i], carts):
+					return (x,y)
+
 			loops += 1
 	except:
 		import pdb
