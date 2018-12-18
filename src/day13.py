@@ -1,9 +1,15 @@
+#41,12 wrong
+
 def crash(cart, carts):
 	crash = 0
+	crashed = set()
 	for c in carts:
 		if cart[0:2] == c[0:2]:
-			crash += 1
-	return crash>1 #larger than one because we're also checking against ourselves
+			crashed.add(cart)
+			crashed.add(c)
+	if len(crashed)>1:#larger than one because we're also checking against ourselves
+		return crashed
+	return set() 
 
 def rot_right(index, wrap = 3):
 	if index==wrap:
@@ -17,6 +23,13 @@ def rot_left(index):
 
 
 def solve(f):
+
+	def cartsort(c2, c1):
+		if c1[1]!=c2[1]: 
+			return c1[1]<c2[1]
+		return c1[0]<c2[0]
+
+
 	try:
 		tracks = f.readlines()
 		dirs = "<^>v"
@@ -28,7 +41,8 @@ def solve(f):
 
 		loops = 0
 		while True:
-			for i, cart in enumerate(carts): #we have t o do this in order. probably sort it first?
+			carts.sort(cartsort)
+			for i, cart in enumerate(carts):
 				x, y, c, state = cart
 				if c==0: x += -1
 				if c==1: y += -1
@@ -52,18 +66,20 @@ def solve(f):
 						c = rot_left(c)
 					if state==2:
 						c = rot_right(c)
-					state += 1
-					if state==3:
-						state = 0
+					state = rot_right(state, 2)
 
 				carts[i] = (x, y, c, state)
-				if crash(carts[i], carts):
-					return (x,y)
+				crashed = crash(carts[i], carts)
+				for c in crashed:
+					carts.remove(c)
+				if len(carts)==1:
+					return carts[0]
 
 			loops += 1
 	except:
 		import pdb
 		pdb.set_trace()
+		raise
 
 
 def solvepart1():
