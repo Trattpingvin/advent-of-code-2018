@@ -40,16 +40,16 @@ def solvepart1():
 def solvepart2():
 	scores = []
 	
-	for i in range(20, 30):
+	for i in range(20, 150):
 		with open('inputs/day12.txt') as f:
 			scores.append(solve(f, i))
 		
 	for i in range(1, len(scores)):
-		print scores[i]
-		print scores[i]-scores[i-1]
+		print (scores[i], scores[i]-scores[i-1])
 	with open('inputs/day12.txt') as f:
-		last_gen = 45
-		return solve(f,last_gen) + 109*(50000000000-last_gen)//2 #manual inspection of output found repetition after generation 28. Score increases by 109 every 2nd generation.
+		last_gen = 494
+		return solve(f,last_gen) + 57*(50000000000-last_gen) #manual inspection of output found repetition after generation 28. Score increases by 109 every 2nd generation.
+		#return solve(f,last_gen) + 59*(50000000000-last_gen) #manual inspection of output found repetition after generation 28. Score increases by 109 every 2nd generation.
 
 if __name__=='__main__':
 	print solvepart1()
