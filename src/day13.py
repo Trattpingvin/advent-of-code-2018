@@ -1,12 +1,16 @@
 #41,12 wrong
+#41,13 wrong
+#147,92 wrong
+#147,93 wrong
+import operator
 
 def crash(cart, carts):
 	crash = 0
 	crashed = set()
 	for c in carts:
 		if cart[0:2] == c[0:2]:
-			crashed.add(cart)
-			crashed.add(c)
+			crashed.add(cart[4])
+			crashed.add(c[4])
 	if len(crashed)>1:#larger than one because we're also checking against ourselves
 		return crashed
 	return set() 
@@ -24,30 +28,28 @@ def rot_left(index):
 
 def solve(f):
 
-	def cartsort(c2, c1):
-		if c1[1]!=c2[1]: 
-			return c1[1]<c2[1]
-		return c1[0]<c2[0]
-
-
 	try:
 		tracks = f.readlines()
 		dirs = "<^>v"
-		carts = [] #cart is tuple: x-coord, y-coord, direction, turning state
+		carts = [] #cart is tuple: x-coord, y-coord, direction, turning state, id
+		i = 0
 		for y, line in enumerate(tracks):
 			for x, c in enumerate(line):
 				if c in dirs:
-					carts.append((x, y, dirs.index(c), 0))
+					carts.append((x, y, dirs.index(c), 0, i))
+					i += 1
 
 		loops = 0
 		while True:
-			carts.sort(cartsort)
+			carts.sort(key=operator.itemgetter(0))
+			carts.sort(key=operator.itemgetter(1))#sort by x first, then y. correct sorting because sort() is stable
+			crashed = set()
 			for i, cart in enumerate(carts):
-				x, y, c, state = cart
+				x, y, c, state, cartnum = cart
 				if c==0: x += -1
-				if c==1: y += -1
-				if c==2: x += 1
-				if c==3: y += 1
+				elif c==1: y += -1
+				elif c==2: x += 1
+				elif c==3: y += 1
 
 				if tracks[y][x] == '/':
 					if c==0: c = rot_left(c)
@@ -62,18 +64,22 @@ def solve(f):
 					elif c==3: c = rot_left(c)
 					
 				if tracks[y][x] == '+':
-					if state==0:
-						c = rot_left(c)
-					if state==2:
-						c = rot_right(c)
+					if state==0: c = rot_left(c)
+					if state==2: c = rot_right(c)
 					state = rot_right(state, 2)
 
-				carts[i] = (x, y, c, state)
-				crashed = crash(carts[i], carts)
-				for c in crashed:
-					carts.remove(c)
-				if len(carts)==1:
-					return carts[0]
+				carts[i] = (x, y, c, state, cartnum)
+				crashed = crashed.union(crash(carts[i], carts))
+				
+				
+			for c_i in crashed:
+				print str(loops)+": "+str(c)
+				for c2 in carts:
+					if c2[4]==c_i:
+						carts.remove(c2)
+						break
+			if len(carts)==1:
+				return carts
 
 			loops += 1
 	except:
@@ -81,26 +87,6 @@ def solve(f):
 		pdb.set_trace()
 		raise
 
-
-def solvepart1():
-	with open('inputs/day13.txt') as f:
-		return solve(f)
-	
-
-def solvepart2():
-	freq = 0
-	seen_freqs = set([freq])
-	while True:
-		with open('inputs/day1.txt') as f:
-			for i in f:
-				freq += int(i)
-				if freq in seen_freqs:
-					return freq
-				seen_freqs.add(freq)
-
-	return freq
-
 if __name__=='__main__':
-	print solvepart1()
-	print solvepart2()
-
+	with open('inputs/day13.txt') as f:
+		print solve(f)
