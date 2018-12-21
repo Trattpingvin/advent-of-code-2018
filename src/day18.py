@@ -61,20 +61,22 @@ def tick_minute(image):
 		ans.append(next_line)
 	return ans
 
+def score(image):
+	trees = 0
+	lumberyards = 0
+	for line in image:
+		for c in line:
+			if c=="|": trees += 1
+			elif c=="#": lumberyards += 1
+	return lumberyards*trees
+
+
 def part1(f):
 	img = readimage(f)
 	for _ in range(10):
 		img = tick_minute(img)
 
-	trees = 0
-	lumberyards = 0
-
-	for line in img:
-		for c in line:
-			if c=="|": trees += 1
-			elif c=="#": lumberyards += 1
-
-	return lumberyards*trees
+	return score(img)
 
 def run_example():
 	ex = StringIO.StringIO(""".#.#...|#.
@@ -95,20 +97,29 @@ def run_example():
 def solvepart1():
 	with open('inputs/day18.txt') as f:
 		return part1(f)
-		
+
+def part2(f):
+	img = readimage(f)
+	seen_states = [img, score(img)]
+	target_gen = 1000000000
+	for i in xrange(1, target_gen):
+		new_img = tick_minute(img)
+		new_score = score(new_img)
+		new_state = (new_img, new_score)
+		if new_state in seen_states: #cycle found
+			cycle_start  = seen_states.index(new_state)
+			cycle_length = i - cycle_start +1
+			end_cycle_index = (target_gen-cycle_start)%cycle_length
+			return seen_states[cycle_start+end_cycle_index+1][1]
+
+		seen_states.append(new_state)
+		img = new_img
+
 
 def solvepart2():
-	freq = 0
-	seen_freqs = set([freq])
-	while True:
-		with open('inputs/day1.txt') as f:
-			for i in f:
-				freq += int(i)
-				if freq in seen_freqs:
-					return freq
-				seen_freqs.add(freq)
+	with open('inputs/day18.txt') as f:
+		return part2(f)
 
-	return freq
 
 if __name__=='__main__':
 	print run_example()
