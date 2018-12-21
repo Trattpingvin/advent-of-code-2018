@@ -7,7 +7,7 @@ import collections
 
 def alive(it):
 	for u in it:
-		if u.hp>=0:
+		if u.hp>0:
 			yield u
 
 def adjacent(x, y):
@@ -17,25 +17,28 @@ def adjacent(x, y):
 	yield (x, y+1)
 
 def shortest_path(cave, startx, starty, target):
-
+	#returns step necessary to reach closest enemy, tupled with distance to that enemy
 	try:
 		i = 0
-		current_stack = collections.deque(((coord, coord) for coord in adjacent(startx, starty)))
-		visited = set(adjacent(startx, starty))
-		while(len(current_stack)>0):
+		current = [(coord, coord) for coord in adjacent(startx, starty)] #list of tuples indicating where we should look, and which step we took to get there
+		already_queued = set(adjacent(startx, starty))
+		already_queued.add((startx, starty))
+		while(len(current)>0):
+			current.sort(key = lambda coord : coord[0][0])
+			current.sort(key = lambda coord : coord[0][1])
 			found = list()
-			while(len(current_stack)>0):
-				cur, start = current_stack.popleft()
+			while(len(current)>0):
+				cur, first_step = current.pop(0)
 				x, y = cur
 				if cave[y][x] == target:
-					return (start[0]-startx, start[1]-starty), i
+					return (first_step[0]-startx, first_step[1]-starty), i
 				elif cave[y][x] == ".":
-					new_tiles = [(adj, start) for adj in adjacent(x,y) if adj not in visited]
+					new_tiles = [(adj, first_step) for adj in adjacent(x,y) if adj not in already_queued]
 					for t in new_tiles:
 						found.append(t)	
-						visited.add(t[0])
+						already_queued.add(t[0])
 
-			current_stack = collections.deque(collections.OrderedDict.fromkeys(found)) #remove duplicates while keeping order
+			current = [c for c in found]
 			i += 1
 	except:
 		pdb.set_trace()
@@ -49,12 +52,12 @@ def shortest_path(cave, startx, starty, target):
 
 
 class Unit():
-	def __init__(self, x, y, type):
+	def __init__(self, x, y, type, ap = 3):
 		self.x = x
 		self.y = y
 		self.type = type
 		self.hp = 200
-		self.ap = 3
+		self.ap = ap
 
 	def __repr__(self):
 		return "<{}({}, {}) hp:{}>".format(self.type, self.x, self.y, self.hp)
@@ -104,7 +107,7 @@ class Unit():
 	def pos(self):
 		return (self.x, self.y)
 
-def read_input(f):
+def read_input(f, elf_attackpower = 3):
 	cave = []
 	for line in f.readlines():
 		cave.append(list(line))
@@ -113,7 +116,7 @@ def read_input(f):
 	for y, line in enumerate(cave):
 		for x, c in enumerate(line):
 			if c=='G': goblins.append(Unit(x, y, c))
-			elif c=='E': elves.append(Unit(x, y, c))
+			elif c=='E': elves.append(Unit(x, y, c, elf_attackpower))
 
 	return (cave, goblins, elves)
 
@@ -176,12 +179,12 @@ def test_examples():
 
 	for i, pair in enumerate(examples):
 		example, expected = pair
-		ans = run_simulation(example)
+		ans = run_simulation(example)[0]
 		print "Example {} {}".format(i+1, "passed" if ans==expected else "expected "+str(expected)+" but got "+str(ans))
 
 
-def run_simulation(f):
-	cave, goblins, elves = read_input(f)
+def run_simulation(f, elf_attackpower = 3):
+	cave, goblins, elves = read_input(f, elf_attackpower)
 	loops = 0
 	try:
 		while(len(goblins)>0 and len(elves)>0):
@@ -210,7 +213,7 @@ def run_simulation(f):
 		pdb.set_trace()
 		raise
 	#pdb.set_trace()
-	return (loops-1)*sum([u.hp for u in goblins+elves])
+	return (loops-1)*sum([u.hp for u in goblins+elves]), len(elves)
 
 
 def solvepart1():
@@ -218,10 +221,25 @@ def solvepart1():
 		return run_simulation(f)
 		
 def solvepart2():
-	pass
+	num_starting_elves = 0
+	with open("inputs/day15.txt") as f:
+		for line in f:
+			for c in line:
+				if c=="E": num_starting_elves += 1
+
+	elf_attackpower = 3
+	while True:
+		print "running simulation with attackpower "+str(elf_attackpower)
+		elf_attackpower += 1
+		with open("inputs/day15.txt") as f:
+			ans = run_simulation(f, elf_attackpower)
+		if ans[1] == num_starting_elves:
+			return ans[0]
+
+	
 
 if __name__=='__main__':
 	test_examples();
 	print solvepart1()
-	#print solvepart2()
+	print solvepart2()
 
