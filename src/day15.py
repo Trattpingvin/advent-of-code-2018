@@ -64,6 +64,7 @@ class Unit():
 		if self.move(enemies, cave): self.attack(enemies, cave)
 
 	def move(self, enemies, cave):
+		assert(cave[self.y][self.x]==self.type)
 		if len(list(alive(enemies)))==0:
 			return False
 		adj = list(adjacent(self.x, self.y))
