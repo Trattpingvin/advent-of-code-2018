@@ -2,12 +2,13 @@ import itertools
 import StringIO
 
 def adjacent(coord, areasize):
+	x, y = coord
 	x_combo = [-1, 0, 1]
 	y_combo = [-1, 0, 1]
-	if coord[0]==0: x_combo.remove(-1)
-	if coord[1]==0: y_combo.remove(-1)
-	if coord[0]==areasize-1: x_combo.remove(1)
-	if coord[1]==areasize-1: y_combo.remove(1)
+	if x==0: x_combo.remove(-1)
+	if y==0: y_combo.remove(-1)
+	if x==areasize-1: x_combo.remove(1)
+	if y==areasize-1: y_combo.remove(1)
 
 	for p in itertools.product(x_combo, y_combo):
 		if p==(0,0): continue
@@ -25,21 +26,23 @@ def process_rules(acre, startpos, image):
 	TREE = "|"
 	LUMBERYARD = "#"
 
-	if acre=='.':
+	if acre==OPEN:
 		trees = 0
 		for x, y in adjacent(startpos, len(image)):
 			if image[y][x]==TREE: trees += 1
 		if trees>=3:
 			return TREE
 		return OPEN
-	if acre=='|':
+
+	if acre==TREE:
 		lumberyards = 0
 		for x, y in adjacent(startpos, len(image)):
 			if image[y][x]==LUMBERYARD: lumberyards += 1
 		if lumberyards>=3:
 			return LUMBERYARD
 		return TREE
-	if acre=='#':
+
+	if acre==LUMBERYARD:
 		lumberyards = 0
 		trees = 0
 		for x, y in adjacent(startpos, len(image)):
@@ -49,7 +52,6 @@ def process_rules(acre, startpos, image):
 			return LUMBERYARD
 		return OPEN
 
-	print acre
 	raise ValueError("bad map")
 
 def tick_minute(image):
@@ -100,7 +102,7 @@ def solvepart1():
 
 def part2(f):
 	img = readimage(f)
-	seen_states = [img, score(img)]
+	seen_states = [(img, score(img))]
 	target_gen = 1000000000
 	for i in xrange(1, target_gen):
 		new_img = tick_minute(img)

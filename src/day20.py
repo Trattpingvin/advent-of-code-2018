@@ -1,3 +1,12 @@
+
+
+def parse_branches(regex):
+	#find group
+	#split members in group
+	#call this function on each member
+
+
+
 def solvepart1():
 	freq = 0
 	with open('inputs/day1.txt') as f:
