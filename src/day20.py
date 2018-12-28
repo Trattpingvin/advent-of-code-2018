@@ -3,7 +3,6 @@ import StringIO
 
 def parse_branches(regex):
 	
-
 	ans = []
 	stopcount = 0
 	startcount = 0
@@ -24,64 +23,64 @@ def parse_branches(regex):
 	#split members in group
 	#call this function on each member
 
+
+
+
 def longest_route(regex):
-	if len(regex)<1: return 0
-	ans = 0
 
-	#pdb.set_trace()
-
-	stopcount = 0
 	startcount = 0
 	startindex = 0
-	stopindex = 0
+	stopcount = 0
+	backtrack = False
+
 	groups = []
+	current = 0
 
 	for i, c in enumerate(regex):
-
-		if startcount>0: #we're in matching mode, trying to find the closing parenthesis
+		if startcount>0: #trying to match a parenthesis
 			if c=='(':
 				startcount += 1
 			elif c==')':
 				stopcount += 1
-				if startcount==stopcount:
-					stopindex = i
-					ans += longest_route(regex[startindex+1:stopindex])
-					startcount, stopcount = 0,0
-					groups = []
+				if stopcount == startcount:
+
+					groupsize, bt = longest_route(regex[startindex+1:i]) #if this route contains empty |, we want the max of this and the rest of our length
+					if bt:
+						groups.append(current)
+						ans = max(groups)
+						
+						if 0 in groups:
+							backtrack = True
+						
+
+						ans = max(groups) + max(groupsize, longest_route(regex[i+1:])[0]), backtrack
+						print "processed regex: "+regex+", decided it's: "+str(ans)
+						return ans
+					else:
+						current += groupsize
+					startcount = 0
+					startindex = 0
+					stopcount = 0
 
 		else:
-			if c=='(': #enter matching mode
+			if c=='(':
 				startcount = 1
 				startindex = i
 
-				biggest = 0
-				groups.append(i)
-				for a, b in zip(groups, groups[1:]):
-					current = longest_route(regex[stopindex:stopindex+b-a])
-					if  current > biggest:
-						biggest = current
-				ans += biggest
-				
-			elif c==')':
-				raise ValueError("shouldn't happen")
-
 			elif c=='|':
-				groups.append(i)
+				groups.append(current)
+				current = 0
+			else:
+				current += 1
 
-	biggest = 0
-	groups.append(i)
-	if len(groups)==1: ans += i-stopindex + 1
-	else:
-		for a, b in zip(groups, groups[1:]):
-			current = longest_route(regex[stopindex:stopindex+b-a+1])
-			if  current > biggest:
-				biggest = current
-		ans += biggest
+	groups.append(current)
+	ans = max(groups)
 
-	print "processed regex: "+regex+", decided it's size: "+str(ans)
-		
-
-	return ans
+	if 0 in groups:
+		backtrack = True
+	print "processed regex: "+regex+", decided it's: "+str((ans, backtrack))
+	print groups
+	return ans, backtrack
 
 
 
