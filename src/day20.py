@@ -53,8 +53,9 @@ def longest_route(regex):
 							backtrack = True
 						
 
-						ans = max(groups) + max(groupsize, longest_route(regex[i+1:])[0]), backtrack
+						ans = max(groups) + max(groupsize/2, longest_route(regex[i+1:])[0]), backtrack
 						print "processed regex: "+regex+", decided it's: "+str(ans)
+						print groups
 						return ans
 					else:
 						current += groupsize
