@@ -89,6 +89,7 @@ class CPU():
 
 
 def solvepart1():
+	return solvesimplified(950)
 	with open('inputs/day19.txt') as f:
 		ip, program = parse_input(f)
 	cpu = CPU()
@@ -96,7 +97,35 @@ def solvepart1():
 	cpu.program = program
 	return cpu.run()
 
+def solvesimplified(r5):
+	#code reduces to problem "sum all divisors of r[5]""
+
+	def divisors(num):
+		divisors = []
+		smalldiv = 0
+		bigdiv = float('inf')
+		while smalldiv<bigdiv:
+			smalldiv += 1
+			if num%smalldiv==0:
+				bigdiv = num/smalldiv
+
+
+
+				if bigdiv>smalldiv:
+					divisors.append(bigdiv)
+					divisors.append(smalldiv)
+				else:
+					if bigdiv==smalldiv:
+						divisors.append(smalldiv)
+					return divisors
+
+	return sum(divisors(r5))
+
+
+	
+
 def solvepart2():
+	return solvesimplified(10551350)
 	with open('inputs/day19.txt') as f:
 		ip, program = parse_input(f)
 	cpu = CPU()
@@ -104,6 +133,8 @@ def solvepart2():
 	cpu.ip = ip
 	cpu.program = program
 	return cpu.run()
+
+
 
 if __name__=='__main__':
 	print solvepart1()
